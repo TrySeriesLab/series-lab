@@ -1,1 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Series Lab — Build a Character Series That Never Stops</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080810;
+  --bg2:#0d0d1a;
+  --surface:#121220;
+  --surface2:#1a1a2e;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.11);
+  --accent:#ff6b35;
+  --accent2:#ffd166;
+  --teal:#06d6a0;
+  --text:#eeeef5;
+  --muted:#8888a8;
+  --muted2:#44445a;
+  --r:14px;
+  --r-sm:8px;
+  --ff-display:'Fraunces',serif;
+  --ff-body:'Instrument Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--ff-body);font-size:15px;line-height:1.6;overflow-x:hidden}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:2px}
+
+/* ===== ANNOUNCEMENT BAR ===== */
+.announce{
+  background:linear-gradient(90deg,#1a0a00,#200a00,#1a0a00);
+  border-bottom:1px solid rgba(255,107,53,0.15);
+  text-align:center;padding:10px 1rem;font-size:12.5px;
+  color:var(--muted);letter-spacing:0.2px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.announce strong{color:var(--accent2)}
+.announce-pill{
+  font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;
+  background:rgba(255,107,53,0.15);color:var(--accent);border:1px solid rgba(255,107,53,0.25);
+}
+
+/* ===== NAV ===== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:64px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
+  background:rgba(8,8,16,0.8);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:var(--ff-display);font-size:22px;font-weight:900;
+  color:var(--text);text-decoration:none;letter-spacing:-0.5px;
+  display:flex;align-items:center;gap:10px;
+}
+.logo-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none;transition:color .15s}
+.nav-links a:hover{color:var(--text)}
+.nav-btns{display:flex;gap:10px;align-items:center}
+.btn-ghost{
+  font-family:var(--ff-body);font-size:13px;font-weight:500;
+  padding:8px 18px;border-radius:20px;border:1px solid var(--border2);
+  background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-cta-sm{
+  font-family:var(--ff-body);font-size:13px;font-weight:600;
+  padding:8px 20px;border-radius:20px;border:none;
+  background:var(--accent);color:#fff;cursor:pointer;transition:all .15s;
+}
+.btn-cta-sm:hover{background:#ff8555;transform:translateY(-1px)}
+
+/* ===== HERO ===== */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  padding:120px 2rem 80px;max-width:1200px;margin:0 auto;
+  overflow:hidden;
+}
+.hero-bg{
+  position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 600px 400px at 70% 40%,rgba(255,107,53,0.07) 0%,transparent 70%),
+    radial-gradient(ellipse 400px 600px at 20% 70%,rgba(6,214,160,0.04) 0%,transparent 70%);
+}
+.hero-dots{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,0.04) 1px,transparent 1px);
+  background-size:32px 32px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+}
+.hero-content{position:relative;z-index:1;max-width:680px}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--teal);background:rgba(6,214,160,0.08);
+  border:1px solid rgba(6,214,160,0.18);
+  padding:6px 14px;border-radius:20px;margin-bottom:28px;
+  animation:up .7s ease both;
+}
+.hero-tag span{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:blink 1.5s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+h1.hero-h1{
+  font-family:var(--ff-display);
+  font-size:clamp(44px,5.5vw,80px);
+  font-weight:900;line-height:1.02;letter-spacing:-2.5px;
+  color:var(--text);margin-bottom:24px;
+  animation:up .7s .1s ease both;
+}
+h1.hero-h1 em{font-style:italic;color:var(--accent)}
+h1.hero-h1 .line2{color:var(--accent2)}
+
+.hero-sub{
+  font-size:17px;font-weight:400;color:var(--muted);
+  line-height:1.7;max-width:520px;margin-bottom:36px;
+  animation:up .7s .2s ease both;
+}
+.hero-sub strong{color:var(--text);font-weight:500}
+
+.hero-actions{
+  display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px;
+  animation:up .7s .3s ease both;
+}
+.btn-hero{
+  font-family:var(--ff-body);font-size:15px;font-weight:600;
+  padding:14px 30px;border-radius:10px;border:none;
+  background:var(--accent);color:#fff;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;gap:8px;
+}
+.btn-hero:hover{background:#ff8555;transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,107,53,0.3)}
+.btn-outline{
+  font-family:var(--ff-body);font-size:15px;font-weight:500;
+  padding:14px 26px;border-radius:10px;
+  border:1px solid var(--border2);background:transparent;
+  color:var(--muted);cursor:pointer;transition:all .2s;
+}
+.btn-outline:hover{background:var(--surface2);color:var(--text)}
+
+.hero-proof{
+  display:flex;gap:32px;flex-wrap:wrap;
+  animation:up .7s .4s ease both;
+}
+.proof-item{display:flex;flex-direction:column;gap:2px}
+.proof-num{font-family:var(--ff-display);font-size:26px;font-weight:700;color:var(--text);letter-spacing:-1px}
+.proof-label{font-size:12px;color:var(--muted)}
+.proof-sep{width:1px;background:var(--border2);align-self:stretch}
+
+/* ===== EPISODE CARDS FLOATING ===== */
+.hero-visual{
+  position:absolute;right:-20px;top:50%;transform:translateY(-50%);
+  width:420px;display:flex;flex-direction:column;gap:12px;
+  animation:up .7s .5s ease both;
+  pointer-events:none;
+}
+.ep-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:16px;
+  display:flex;align-items:flex-start;gap:14px;
+}
+.ep-thumb{
+  width:56px;height:56px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+}
+.ep-thumb.t1{background:linear-gradient(135deg,#2d1500,#5a2000)}
+.ep-thumb.t2{background:linear-gradient(135deg,#001a2d,#00406b)}
+.ep-thumb.t3{background:linear-gradient(135deg,#1a002d,#3d0066)}
+.ep-info{flex:1;min-width:0}
+.ep-series{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+.ep-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.ep-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.ep-badge{
+  font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;
+  background:rgba(6,214,160,0.1);color:var(--teal);border:1px solid rgba(6,214,160,0.2);
+  white-space:nowrap;
+}
+
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== SECTION SHARED ===== */
+section.pad{padding:90px 2rem;max-width:1200px;margin:0 auto}
+.section-eyebrow{
+  font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--accent);display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;
+}
+.section-eyebrow::before{content:'';width:20px;height:1px;background:var(--accent);display:block}
+h2.sec-title{
+  font-family:var(--ff-display);font-size:clamp(34px,4vw,56px);
+  font-weight:900;letter-spacing:-1.5px;line-height:1.08;
+  color:var(--text);margin-bottom:16px;
+}
+h2.sec-title em{font-style:italic;color:var(--accent2)}
+.sec-sub{font-size:16px;color:var(--muted);max-width:500px;line-height:1.7}
+
+/* ===== HOW IT WORKS ===== */
+.how-grid{
+  display:grid;grid-template-columns:1fr 1.6fr;gap:60px;
+  align-items:center;margin-top:60px;
+}
+.steps{display:flex;flex-direction:column;gap:0}
+.step{
+  display:flex;gap:18px;padding:22px 0;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;transition:all .2s;
+}
+.step:first-child{padding-top:0}
+.step:last-child{border-bottom:none}
+.step.active .step-num{background:var(--accent);color:#fff;border-color:var(--accent)}
+.step.active .step-title{color:var(--text)}
+.step-num{
+  width:32px;height:32px;border-radius:8px;flex-shrink:0;
+  border:1px solid var(--border2);background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--muted);
+  transition:all .2s;margin-top:2px;
+}
+.step-body{}
+.step-title{font-size:15px;font-weight:600;color:var(--muted);margin-bottom:4px;transition:color .2s}
+.step-desc{font-size:13px;color:var(--muted2);line-height:1.6}
+.step-tag{
+  display:inline-block;margin-top:6px;font-size:11px;font-weight:600;
+  padding:3px 10px;border-radius:20px;
+  background:rgba(255,209,102,0.08);color:var(--accent2);border:1px solid rgba(255,209,102,0.15);
+}
+
+.how-preview{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;position:relative;
+}
+.how-preview-top{
+  background:var(--surface2);padding:14px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.dot-row{display:flex;gap:5px}
+.dot-row span{width:10px;height:10px;border-radius:50%}
+.dot-row .d1{background:#ff5f5f}
+.dot-row .d2{background:#ffbd2e}
+.dot-row .d3{background:#27c93f}
+.preview-title{font-size:12px;color:var(--muted);margin-left:8px;font-family:monospace}
+.preview-body{padding:22px}
+
+/* ===== FEATURES ===== */
+.features-wrap{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;margin-top:50px;
+}
+.feat{
+  background:var(--surface);padding:28px 26px;
+  transition:background .2s;
+}
+.feat:hover{background:var(--surface2)}
+.feat-icon{
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;margin-bottom:16px;
+  background:var(--surface2);border:1px solid var(--border2);
+}
+.feat-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* ===== PRICING ===== */
+.pricing-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:50px}
+.plan{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:28px;position:relative;overflow:hidden;
+}
+.plan.featured{border-color:rgba(255,107,53,0.35);background:linear-gradient(160deg,rgba(255,107,53,0.05),var(--surface))}
+.plan.featured::before{
+  content:'Most popular';position:absolute;top:16px;right:16px;
+  font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px;
+  background:rgba(255,107,53,0.15);color:var(--accent);border:1px solid rgba(255,107,53,0.25);
+}
+.plan-name{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px}
+.plan-price{
+  font-family:var(--ff-display);font-size:44px;font-weight:900;
+  color:var(--text);letter-spacing:-2px;margin-bottom:4px;
+}
+.plan-price sup{font-size:20px;vertical-align:top;margin-top:10px;display:inline-block}
+.plan-price span{font-family:var(--ff-body);font-size:14px;font-weight:400;color:var(--muted);letter-spacing:0}
+.plan-desc{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6}
+.plan-divider{height:1px;background:var(--border);margin-bottom:20px}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.plan-features li{
+  font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:flex-start;
+}
+.plan-features li::before{content:'✓';color:var(--teal);font-weight:700;flex-shrink:0}
+.plan-features li.dim{color:var(--muted2)}
+.plan-features li.dim::before{content:'–';color:var(--muted2)}
+.btn-plan{
+  width:100%;padding:12px;border-radius:var(--r-sm);
+  font-family:var(--ff-body);font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .15s;border:1px solid var(--border2);
+  background:transparent;color:var(--text);
+}
+.btn-plan:hover{background:var(--surface2)}
+.plan.featured .btn-plan{background:var(--accent);border-color:transparent;color:#fff}
+.plan.featured .btn-plan:hover{background:#ff8555}
+
+/* ===== SERIES GENERATOR APP ===== */
+.app-wrap{
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.app-inner{max-width:900px;margin:0 auto;padding:80px 2rem}
+.app-panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;position:relative;
+}
+.app-panel::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--teal));
+}
+.app-header{
+  background:var(--surface2);padding:18px 24px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.app-header-title{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.live-badge{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+  background:rgba(6,214,160,0.1);color:var(--teal);border:1px solid rgba(6,214,160,0.2);
+  letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px;
+}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);animation:blink 1.5s infinite}
+.app-body{padding:28px}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-row.three{grid-template-columns:1fr 1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:7px}
+.form-label{
+  font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--muted);
+}
+.form-input{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:11px 14px;
+  font-family:var(--ff-body);font-size:14px;color:var(--text);
+  outline:none;transition:border-color .15s;
+}
+.form-input:focus{border-color:rgba(255,107,53,0.4)}
+.form-input::placeholder{color:var(--muted2)}
+select.form-input{appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238888a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;
+}
+textarea.form-input{resize:vertical;min-height:80px;line-height:1.6}
+
+/* character traits */
+.trait-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.trait-chip{
+  font-size:12px;padding:5px 13px;border-radius:20px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;transition:all .15s;font-family:var(--ff-body);
+}
+.trait-chip:hover{border-color:var(--border2);color:var(--text)}
+.trait-chip.on{background:rgba(255,107,53,0.1);border-color:rgba(255,107,53,0.3);color:var(--accent)}
+
+/* continuation toggle */
+.toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;background:var(--surface2);border-radius:var(--r-sm);
+  border:1px solid var(--border);margin-bottom:16px;
+}
+.toggle-info{display:flex;flex-direction:column;gap:2px}
+.toggle-info span{font-size:13px;font-weight:500;color:var(--text)}
+.toggle-info small{font-size:11px;color:var(--muted)}
+.toggle{
+  width:44px;height:24px;border-radius:12px;border:none;
+  background:var(--muted2);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;
+}
+.toggle.on{background:var(--accent)}
+.toggle::after{
+  content:'';width:18px;height:18px;border-radius:50%;
+  background:#fff;position:absolute;top:3px;left:3px;
+  transition:transform .2s;
+}
+.toggle.on::after{transform:translateX(20px)}
+
+.generate-btn{
+  width:100%;padding:16px;border-radius:var(--r-sm);border:none;
+  background:linear-gradient(90deg,var(--accent),#ff8c55);
+  font-family:var(--ff-display);font-size:17px;font-weight:700;
+  color:#fff;cursor:pointer;transition:all .2s;letter-spacing:-.3px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.generate-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,107,53,0.35)}
+.generate-btn:active{transform:translateY(0)}
+.generate-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* progress */
+.progress-wrap{display:none;margin-top:18px}
+.progress-steps{display:flex;gap:6px;margin-bottom:10px}
+.p-step{
+  flex:1;height:3px;border-radius:2px;background:var(--border);overflow:hidden;
+}
+.p-step-fill{height:100%;border-radius:2px;background:var(--accent);width:0%;transition:width .4s}
+.progress-label{font-size:12px;color:var(--muted);text-align:center}
+
+/* error */
+.err-box{
+  display:none;margin-top:14px;padding:13px 16px;border-radius:var(--r-sm);
+  background:rgba(255,95,95,0.07);border:1px solid rgba(255,95,95,0.18);
+  font-size:13px;color:#ff7070;
+}
+
+/* ===== EPISODES OUTPUT ===== */
+.episodes-out{display:none;margin-top:32px}
+.out-header{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;
+}
+.out-title{font-family:var(--ff-display);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.5px}
+.out-actions{display:flex;gap:8px}
+.btn-xs{
+  font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;
+  border:1px solid var(--border2);background:transparent;color:var(--muted);
+  cursor:pointer;transition:all .15s;font-family:var(--ff-body);
+}
+.btn-xs:hover{background:var(--surface2);color:var(--text)}
+
+.series-badge-row{
+  display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center;
+}
+.series-info-badge{
+  font-size:12px;padding:5px 12px;border-radius:20px;
+  background:var(--surface2);border:1px solid var(--border);color:var(--muted);
+}
+
+.episodes-list{display:flex;flex-direction:column;gap:14px}
+.ep-out-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+  animation:up .4s ease both;transition:border-color .15s;
+}
+.ep-out-card:hover{border-color:var(--border2)}
+.ep-out-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  background:var(--surface2);cursor:pointer;
+}
+.ep-out-header:hover .ep-out-title{color:var(--accent)}
+.ep-out-left{display:flex;align-items:center;gap:12px}
+.ep-num-badge{
+  font-size:11px;font-weight:700;letter-spacing:.5px;
+  padding:4px 10px;border-radius:6px;
+  background:rgba(255,107,53,0.1);color:var(--accent);border:1px solid rgba(255,107,53,0.2);
+  font-family:var(--ff-body);
+}
+.ep-out-title{font-size:14px;font-weight:600;color:var(--text);transition:color .15s}
+.ep-out-right{display:flex;gap:6px;align-items:center}
+.ep-continuation-tag{
+  font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;
+  background:rgba(6,214,160,0.08);color:var(--teal);border:1px solid rgba(6,214,160,0.15);
+}
+.copy-btn{
+  width:28px;height:28px;border-radius:6px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:12px;transition:all .15s;
+}
+.copy-btn:hover{background:var(--surface);color:var(--text);border-color:var(--border2)}
+.copy-btn.done{color:var(--teal);border-color:rgba(6,214,160,0.3)}
+.ep-out-body{padding:18px;display:none}
+.ep-out-body.open{display:block}
+.ep-hook{
+  font-size:14px;font-weight:500;color:var(--accent2);
+  background:rgba(255,209,102,0.05);border-left:2px solid rgba(255,209,102,0.35);
+  padding:10px 14px;border-radius:0 6px 6px 0;margin-bottom:14px;line-height:1.6;
+}
+.ep-hook-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent2);margin-bottom:4px;opacity:.7}
+.ep-script-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.ep-script{font-size:13.5px;color:var(--muted);line-height:1.8;white-space:pre-wrap;margin-bottom:14px}
+.ep-cta-row{
+  display:flex;align-items:flex-start;gap:10px;padding-top:12px;border-top:1px solid var(--border);
+}
+.ep-cta-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-top:1px;flex-shrink:0}
+.ep-cta-text{font-size:13px;color:var(--muted);line-height:1.6}
+.ep-meta-row{
+  display:flex;gap:12px;flex-wrap:wrap;padding-top:10px;
+}
+.ep-meta-item{font-size:11px;color:var(--muted2)}
+
+/* ===== FOOTER ===== */
+footer{
+  border-top:1px solid var(--border);
+  padding:40px 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+  max-width:1200px;margin:0 auto;
+}
+.footer-logo{font-family:var(--ff-display);font-size:18px;font-weight:900;color:var(--text)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .15s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12px;color:var(--muted2);width:100%}
+
+@media(max-width:900px){
+  .hero-visual{display:none}
+  .how-grid{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr 1fr}
+  .pricing-grid{grid-template-columns:1fr 1fr}
+  .form-row{grid-template-columns:1fr}
+  .form-row.three{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .features-grid{grid-template-columns:1fr}
+  .form-row.three{grid-template-columns:1fr}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ANNOUNCE -->
+<div class="announce">
+  <span class="announce-pill">New</span>
+  <span><strong>Auto-continuation is live</strong> — episodes pick up exactly where the last one ended</span>
+</div>
+
+<!-- NAV -->
+<nav style="top:40px">
+  <a href="#" class="nav-logo">
+    <span class="logo-icon">▶</span>
+    Series Lab
+  </a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <div class="nav-btns">
+    <button class="btn-ghost">Log in</button>
+    <button class="btn-cta-sm" onclick="document.getElementById('generator').scrollIntoView({behavior:'smooth'})">Start free →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="padding-top:104px">
+<div style="max-width:1200px;margin:0 auto">
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-dots"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag"><span></span> Character continuity engine</div>
+
+    <h1 class="hero-h1">Build a series<br><em>audiences</em><br><span class="line2">come back for</span></h1>
+
+    <p class="hero-sub">
+      Create your AI character once. Then generate <strong>full episodes automatically</strong> — same voice, same personality, same story thread — forever.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn-hero" onclick="document.getElementById('generator').scrollIntoView({behavior:'smooth'})">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M6.5 5.5L11 8L6.5 10.5V5.5Z" fill="white"/></svg>
+        Start your series today
+      </button>
+      <button class="btn-outline" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</button>
+    </div>
+
+    <div class="hero-proof">
+      <div class="proof-item"><div class="proof-num">30×</div><div class="proof-label">Episodes per batch</div></div>
+      <div class="proof-sep"></div>
+      <div class="proof-item"><div class="proof-num">5</div><div class="proof-label">Steps to monetize</div></div>
+      <div class="proof-sep"></div>
+      <div class="proof-item"><div class="proof-num">100%</div><div class="proof-label">Character consistent</div></div>
+    </div>
+  </div>
+
+  <!-- floating episode cards -->
+  <div class="hero-visual">
+    <div class="ep-card">
+      <div class="ep-thumb t1">🧅</div>
+      <div class="ep-info">
+        <div class="ep-series">The Onion Chronicles · EP 01</div>
+        <div class="ep-title">Why Everyone Keeps Ignoring My Advice</div>
+        <div class="ep-desc">Hook: "I've been giving out wisdom for 40 years and people STILL—"</div>
+      </div>
+      <span class="ep-badge">Live</span>
+    </div>
+    <div class="ep-card" style="margin-left:24px;opacity:.85">
+      <div class="ep-thumb t2">🤖</div>
+      <div class="ep-info">
+        <div class="ep-series">BudgetBot · EP 04</div>
+        <div class="ep-title">The $47 Challenge (Continuation)</div>
+        <div class="ep-desc">Picks up exactly where EP 03 ended...</div>
+      </div>
+      <span class="ep-badge">Auto-continued</span>
+    </div>
+    <div class="ep-card" style="margin-left:12px;opacity:.65">
+      <div class="ep-thumb t3">🧙</div>
+      <div class="ep-info">
+        <div class="ep-series">FinanceWitch · EP 12</div>
+        <div class="ep-title">The Spell That Made Me $2k Last Month</div>
+        <div class="ep-desc">Same character, same mystical tone, new episode...</div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="pad" id="how">
+  <div class="section-eyebrow">The system</div>
+  <h2 class="sec-title">Five steps from zero<br>to <em>monetized series</em></h2>
+  <p class="sec-sub">Research → lock identity → ship volume → iterate → monetize. One repeatable engine.</p>
+
+  <div class="how-grid">
+    <div class="steps">
+      <div class="step active" onclick="setStep(0,this)">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-title">Find your viral niche</div>
+          <div class="step-desc">Test 2–3 angles. Look for repeatable hooks and clear viewer intent before committing.</div>
+          <span class="step-tag">Free research tool</span>
+        </div>
+      </div>
+      <div class="step" onclick="setStep(1,this)">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-title">Lock your character identity</div>
+          <div class="step-desc">Define voice, personality, and visual style. Series Lab locks it in and never drifts.</div>
+          <span class="step-tag">Voice + style continuity</span>
+        </div>
+      </div>
+      <div class="step" onclick="setStep(2,this)">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-title">Ship volume in batches</div>
+          <div class="step-desc">Generate 2–30 episodes at once. Build a content buffer so you never miss a post.</div>
+          <span class="step-tag">2–30 episodes per run</span>
+        </div>
+      </div>
+      <div class="step" onclick="setStep(3,this)">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-title">Iterate into a winner</div>
+          <div class="step-desc">Track retention signals. Double down on what works. Kill what doesn't — fast.</div>
+          <span class="step-tag">Signals → decisions</span>
+        </div>
+      </div>
+      <div class="step" onclick="setStep(4,this)">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <div class="step-title">Monetize</div>
+          <div class="step-desc">In-platform first. Then layer affiliate and product deals once your format wins.</div>
+          <span class="step-tag">Attention → income</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-preview">
+      <div class="how-preview-top">
+        <div class="dot-row"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+        <span class="preview-title" id="preview-title">niche-research.ai</span>
+      </div>
+      <div class="preview-body" id="preview-body">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Suggested niches for your profile:</div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px">
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">💰 Finance for beginners</div>
+            <div style="font-size:12px;color:var(--muted)">High demand · Low competition · Recurring hook potential</div>
+            <div style="margin-top:8px;display:flex;gap:6px">
+              <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(6,214,160,0.1);color:var(--teal);border:1px solid rgba(6,214,160,0.15)">Strong</span>
+            </div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;opacity:.7">
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">🧠 Psychology hacks</div>
+            <div style="font-size:12px;color:var(--muted)">Viral potential · Medium competition</div>
+          </div>
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;opacity:.5">
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">🏋️ Fitness motivation</div>
+            <div style="font-size:12px;color:var(--muted)">Oversaturated — needs unique angle</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<div class="features-wrap">
+<section class="pad" id="features">
+  <div class="section-eyebrow">Everything included</div>
+  <h2 class="sec-title">One tool.<br><em>Infinite episodes.</em></h2>
+
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-icon">🔁</div>
+      <div class="feat-title">Auto-continuation</div>
+      <div class="feat-desc">Each new episode picks up the exact narrative thread from the last one. No manual bridging needed.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🎭</div>
+      <div class="feat-title">Character memory</div>
+      <div class="feat-desc">Your character's quirks, catchphrases, tone, and backstory stay perfectly consistent across every episode.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">Batch generation</div>
+      <div class="feat-desc">Generate up to 30 episodes in a single run. Fill your content calendar in minutes, not weeks.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🎯</div>
+      <div class="feat-title">Platform-native scripts</div>
+      <div class="feat-desc">TikTok, Shorts, and Reels each get scripts tuned to their pacing, hook style, and ideal length.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Series arc planning</div>
+      <div class="feat-desc">Define a season arc and the AI maps each episode's role in the larger story automatically.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📋</div>
+      <div class="feat-title">Export & publish</div>
+      <div class="feat-desc">Download all scripts as a text file, copy individually, or push directly to your content workflow.</div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- GENERATOR APP -->
+<div class="app-wrap" id="generator">
+<div class="app-inner">
+  <div class="section-eyebrow" style="margin-bottom:16px">Try it live</div>
+  <h2 class="sec-title" style="margin-bottom:8px">Generate your<br><em>first episode series</em></h2>
+  <p style="font-size:15px;color:var(--muted);margin-bottom:36px;line-height:1.7">Fill in your character, hit generate. Your series starts now.</p>
+
+  <div class="app-panel">
+    <div class="app-header">
+      <div class="app-header-title">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="var(--accent)" stroke-width="1.5"/><path d="M6.5 5.5L11 8L6.5 10.5V5.5Z" fill="var(--accent)"/></svg>
+        Series generator
+      </div>
+      <div class="live-badge"><span class="live-dot"></span>Live</div>
+    </div>
+    <div class="app-body">
+
+      <!-- character setup -->
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:14px">① Character identity</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Character name</label>
+          <input class="form-input" id="charName" type="text" placeholder="e.g. Professor Broke, The Onion Lady…"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Series concept / niche</label>
+          <input class="form-input" id="niche" type="text" placeholder="e.g. Broke person giving financial advice…"/>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Character backstory & personality</label>
+        <textarea class="form-input" id="backstory" placeholder="e.g. A sarcastic onion who went broke trying to invest in stocks, now gives hilariously bad financial advice with total confidence…"></textarea>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Personality traits</div>
+      <div class="trait-chips" id="traitChips">
+        <button class="trait-chip on" data-t="Sarcastic">Sarcastic</button>
+        <button class="trait-chip" data-t="Motivational">Motivational</button>
+        <button class="trait-chip" data-t="Deadpan">Deadpan</button>
+        <button class="trait-chip" data-t="Chaotic">Chaotic</button>
+        <button class="trait-chip on" data-t="Overconfident">Overconfident</button>
+        <button class="trait-chip" data-t="Wholesome">Wholesome</button>
+        <button class="trait-chip" data-t="Mysterious">Mysterious</button>
+        <button class="trait-chip" data-t="Relatable">Relatable</button>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:20px 0"></div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:14px">② Episode settings</div>
+
+      <div class="form-row three">
+        <div class="form-group">
+          <label class="form-label">Platform</label>
+          <select class="form-input" id="platform">
+            <option>TikTok</option>
+            <option>YouTube Shorts</option>
+            <option>Instagram Reels</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Number of episodes</label>
+          <select class="form-input" id="epCount">
+            <option value="3">3 episodes</option>
+            <option value="5" selected>5 episodes</option>
+            <option value="8">8 episodes</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Episode length</label>
+          <select class="form-input" id="epLength">
+            <option value="30-second">30 seconds</option>
+            <option value="60-second" selected>60 seconds</option>
+            <option value="90-second">90 seconds</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Season arc / overarching storyline <span style="font-weight:400;opacity:.5">(optional)</span></label>
+        <input class="form-input" id="arc" type="text" placeholder="e.g. Character tries to pay off $10k debt using increasingly bad ideas…"/>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:20px 0"></div>
+
+      <!-- toggles -->
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span>Auto-continuation</span>
+          <small>Each episode picks up from where the previous one ended</small>
+        </div>
+        <button class="toggle on" id="contToggle" onclick="this.classList.toggle('on')"></button>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span>Include cliffhangers</span>
+          <small>End each episode with a hook that drives viewers to the next</small>
+        </div>
+        <button class="toggle on" id="cliffToggle" onclick="this.classList.toggle('on')"></button>
+      </div>
+
+      <button class="generate-btn" id="genBtn" onclick="generateSeries()" style="margin-top:20px">
+        <span id="genBtnText">Generate episode series →</span>
+      </button>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-steps" id="progressSteps"></div>
+        <div class="progress-label" id="progressLabel">Crafting your series…</div>
+      </div>
+      <div class="err-box" id="errBox"></div>
+    </div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="episodes-out" id="episodesOut">
+    <div class="out-header">
+      <div class="out-title" id="outTitle">Your Series</div>
+      <div class="out-actions">
+        <button class="btn-xs" onclick="copyAllEpisodes()">Copy all</button>
+        <button class="btn-xs" onclick="downloadSeries()">Download .txt</button>
+        <button class="btn-xs" onclick="clearOut()">Clear</button>
+      </div>
+    </div>
+    <div class="series-badge-row" id="seriesBadgeRow"></div>
+    <div class="episodes-list" id="episodesList"></div>
+  </div>
+</div>
+</div>
+
+<!-- PRICING -->
+<section class="pad" id="pricing">
+  <div class="section-eyebrow">Simple pricing</div>
+  <h2 class="sec-title">Start free.<br><em>Scale when ready.</em></h2>
+
+  <div class="pricing-grid">
+
+    <!-- STARTER -->
+    <div class="plan">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price"><sup>$</sup>19<span>/month</span></div>
+      <div class="plan-desc">Jump in and start building your first series.</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>12 episodes per month</li>
+        <li>1 character</li>
+        <li>TikTok & Shorts</li>
+        <li>Script + video generation</li>
+        <li>Auto-continuation</li>
+        <li class="dim">Batch generation</li>
+        <li class="dim">Series arc planning</li>
+        <li class="dim">Team access</li>
+      </ul>
+      <button class="btn-plan">Start Starter plan</button>
+    </div>
+
+    <!-- CREATOR — MOST POPULAR -->
+    <div class="plan featured">
+      <div class="plan-name">Creator</div>
+      <div class="plan-price"><sup>$</sup>39<span>/month</span></div>
+      <div class="plan-desc">The sweet spot for serious content creators.</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>25 episodes per month</li>
+        <li>5 characters</li>
+        <li>All platforms</li>
+        <li>Script + video generation</li>
+        <li>Auto-continuation engine</li>
+        <li>Batch up to 10 at once</li>
+        <li>Series arc planning</li>
+        <li class="dim">Team access</li>
+      </ul>
+      <button class="btn-plan">Start Creator plan</button>
+    </div>
+
+    <!-- PRO -->
+    <div class="plan">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><sup>$</sup>69<span>/month</span></div>
+      <div class="plan-desc">For power creators posting every single day.</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>50 episodes per month</li>
+        <li>15 characters</li>
+        <li>All platforms</li>
+        <li>Script + video generation</li>
+        <li>Auto-continuation engine</li>
+        <li>Batch up to 20 at once</li>
+        <li>Series arc planning</li>
+        <li>Priority support</li>
+      </ul>
+      <button class="btn-plan">Start Pro plan</button>
+    </div>
+
+    <!-- AGENCY -->
+    <div class="plan">
+      <div class="plan-name">Agency</div>
+      <div class="plan-price"><sup>$</sup>149<span>/month</span></div>
+      <div class="plan-desc">For teams managing multiple brands and channels.</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>120 episodes per month</li>
+        <li>Unlimited characters</li>
+        <li>All platforms</li>
+        <li>Script + video generation</li>
+        <li>Auto-continuation engine</li>
+        <li>Batch up to 30 at once</li>
+        <li>Series arc planning</li>
+        <li>Team access (5 seats)</li>
+      </ul>
+      <button class="btn-plan">Start Agency plan</button>
+    </div>
+
+    <!-- STUDIO -->
+    <div class="plan">
+      <div class="plan-name">Studio</div>
+      <div class="plan-price"><sup>$</sup>299<span>/month</span></div>
+      <div class="plan-desc">Enterprise-grade for high-volume video studios.</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li>250 episodes per month</li>
+        <li>Unlimited characters</li>
+        <li>All platforms</li>
+        <li>Script + video generation</li>
+        <li>Auto-continuation engine</li>
+        <li>Batch up to 30 at once</li>
+        <li>Series arc planning</li>
+        <li>Team access (10 seats)</li>
+      </ul>
+      <button class="btn-plan">Start Studio plan</button>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Series Lab</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+  </div>
+  <div class="footer-copy">© 2025 Series Lab · Built independently · Not affiliated with any other service · All content generated is original and owned by the user.</div>
+</footer>
+
+<script>
+/* ---- TRAIT CHIPS ---- */
+document.querySelectorAll('.trait-chip').forEach(c => {
+  c.addEventListener('click', () => c.classList.toggle('on'));
+});
+
+/* ---- HOW IT WORKS STEPS ---- */
+const stepPreviews = [
+  {title:'niche-research.ai', html:`<div style="display:flex;flex-direction:column;gap:10px"><div style="font-size:12px;color:var(--muted);margin-bottom:6px">Suggested niches for your profile:</div><div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">💰 Finance for beginners</div><div style="font-size:12px;color:var(--muted)">High demand · Low competition · Recurring hook potential</div><div style="margin-top:8px"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(6,214,160,0.1);color:var(--teal);border:1px solid rgba(6,214,160,0.15)">Strong signal</span></div></div><div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;opacity:.7"><div style="font-size:13px;font-weight:600;color:var(--text)">🧠 Psychology hacks</div><div style="font-size:12px;color:var(--muted)">Viral potential · Medium competition</div></div></div>`},
+  {title:'character-builder.ai', html:`<div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:12px;color:var(--muted)">Character locked:</div><div style="background:var(--surface2);border:1px solid rgba(255,107,53,0.2);border-radius:8px;padding:14px"><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">Professor Broke 💸</div><div style="font-size:12px;color:var(--muted);line-height:1.6">A sarcastic ex-Wall Street analyst who lost everything on meme stocks. Now dispenses hilariously wrong financial advice with absolute confidence.</div><div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(255,107,53,0.1);color:var(--accent);border:1px solid rgba(255,107,53,0.2)">Sarcastic</span><span style="font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(255,107,53,0.1);color:var(--accent);border:1px solid rgba(255,107,53,0.2)">Overconfident</span><span style="font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(255,107,53,0.1);color:var(--accent);border:1px solid rgba(255,107,53,0.2)">Chaotic</span></div></div><div style="font-size:11px;color:var(--teal);display:flex;align-items:center;gap:4px">✓ Identity locked — all episodes will match this voice</div></div>`},
+  {title:'batch-generator.ai', html:`<div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">Generating batch — 10 episodes</div>${[1,2,3].map(i=>`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;color:var(--text)">EP 0${i}: ${['The Worst Advice I Ever Gave','Why You Should YOLO Your Savings','My 5 Worst Investments'][i-1]}</div><span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(6,214,160,0.1);color:var(--teal)">Done</span></div>`).join('')}<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;color:var(--muted)">EP 04: Generating...</div><div style="width:60px;height:3px;border-radius:2px;background:var(--border);overflow:hidden"><div style="width:60%;height:100%;background:var(--accent);border-radius:2px"></div></div></div></div>`},
+  {title:'analytics.ai', html:`<div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:12px;color:var(--muted)">EP performance signals:</div><div style="display:flex;gap:10px"><div style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--teal)">89%</div><div style="font-size:11px;color:var(--muted)">Avg retention</div></div><div style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--accent)">4.2×</div><div style="font-size:11px;color:var(--muted)">Share rate</div></div></div><div style="background:rgba(6,214,160,0.05);border:1px solid rgba(6,214,160,0.15);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--teal)">↑ "Bad advice" format outperforms educational by 3× — double down</div></div>`},
+  {title:'monetize.ai', html:`<div style="display:flex;flex-direction:column;gap:10px"><div style="font-size:12px;color:var(--muted)">Revenue streams unlocked:</div><div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">📺 TikTok Creator Fund</div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="width:70%;height:100%;background:var(--teal)"></div></div><span style="font-size:12px;color:var(--teal)">Active</span></div></div><div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px"><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px">🔗 Affiliate partnerships</div><div style="font-size:12px;color:var(--muted)">2 brand deals matched to your niche</div></div></div>`},
+];
+
+function setStep(idx, el) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('preview-title').textContent = stepPreviews[idx].title;
+  document.getElementById('preview-body').innerHTML = stepPreviews[idx].html;
+}
+
+/* ---- GENERATOR ---- */
+let seriesData = [];
+let seriesCharName = '';
+
+function getActiveTraits() {
+  return [...document.querySelectorAll('.trait-chip.on')].map(c => c.dataset.t).join(', ');
+}
+
+async function generateSeries() {
+  const charName = document.getElementById('charName').value.trim();
+  const niche = document.getElementById('niche').value.trim();
+  if (!charName || !niche) {
+    ['charName','niche'].forEach(id => {
+      if (!document.getElementById(id).value.trim()) {
+        document.getElementById(id).style.borderColor = 'rgba(255,95,95,0.5)';
+        setTimeout(() => document.getElementById(id).style.borderColor = '', 1500);
+      }
+    });
+    return;
+  }
+  const backstory = document.getElementById('backstory').value.trim();
+  const platform = document.getElementById('platform').value;
+  const count = parseInt(document.getElementById('epCount').value);
+  const length = document.getElementById('epLength').value;
+  const arc = document.getElementById('arc').value.trim();
+  const traits = getActiveTraits();
+  const continuation = document.getElementById('contToggle').classList.contains('on');
+  const cliffhangers = document.getElementById('cliffToggle').classList.contains('on');
+  seriesCharName = charName;
+
+  setLoading(true, count);
+
+  const system = `You are an expert short-form video series writer. You create character-driven episode series for ${platform}.
+
+Character: ${charName}
+Niche: ${niche}
+Backstory: ${backstory || 'No backstory provided — invent one consistent with the niche.'}
+Personality traits: ${traits || 'Entertaining and engaging'}
+Season arc: ${arc || 'No specific arc — create organic episodes that build the character.'}
+Continuation: ${continuation ? 'YES — each episode must pick up directly from where the previous ended' : 'NO — episodes are standalone'}
+Cliffhangers: ${cliffhangers ? 'YES — end each episode with a compelling hook that drives viewers to the next' : 'NO'}
+
+Rules:
+- Every episode must feel like the SAME character. Same voice, same quirks, same catchphrases.
+- Each episode needs a scroll-stopping HOOK in the first 2 sentences.
+- Scripts must be optimised for ${length} delivery.
+${continuation ? '- Episode 1 sets up the situation. Episode 2+ picks up exactly where the last ended.' : ''}
+${cliffhangers ? '- End with: "Next time on [series]..." teaser' : ''}
+
+Return ONLY valid JSON — array of objects with:
+- "episode": number
+- "title": string (catchy episode title, max 8 words)
+- "hook": string (opening 1-2 sentences — the scroll-stopper)
+- "script": string (full episode body)
+- "cta": string (call to action / cliffhanger)
+- "continuation_note": string (1 sentence describing what the next episode should continue from)
+
+No markdown, no explanation. Just raw JSON array.`;
+
+  const user = `Generate ${count} episodes (${length} each) for the "${charName}" series about "${niche}". Return JSON array only.`;
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        system,
+        messages: [{role:'user',content:user}]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content.map(b => b.text||'').join('');
+    const clean = raw.replace(/```json|```/g,'').trim();
+    seriesData = JSON.parse(clean);
+    renderSeries(seriesData, charName, platform, niche);
+  } catch(e) {
+    showErr('Error: ' + e.message);
+  } finally {
+    setLoading(false, count);
+  }
+}
+
+function setLoading(on, count) {
+  const btn = document.getElementById('genBtn');
+  const pw = document.getElementById('progressWrap');
+  const eb = document.getElementById('errBox');
+  btn.disabled = on;
+  eb.style.display = 'none';
+  if (on) {
+    document.getElementById('genBtnText').textContent = 'Generating…';
+    pw.style.display = 'block';
+    const ps = document.getElementById('progressSteps');
+    ps.innerHTML = Array.from({length:count||5},(_,i)=>`<div class="p-step"><div class="p-step-fill" id="pf${i}"></div></div>`).join('');
+    let filled = 0;
+    const interval = setInterval(() => {
+      if (filled < (count||5)) {
+        document.getElementById('pf'+filled).style.width = '100%';
+        filled++;
+        document.getElementById('progressLabel').textContent = `Writing episode ${filled} of ${count||5}…`;
+      } else {
+        clearInterval(interval);
+      }
+    }, 600);
+    window._progInterval = interval;
+  } else {
+    clearInterval(window._progInterval);
+    pw.style.display = 'none';
+    document.getElementById('genBtnText').textContent = 'Generate episode series →';
+  }
+}
+
+function showErr(msg) {
+  const eb = document.getElementById('errBox');
+  eb.style.display = 'block';
+  eb.textContent = msg;
+}
+
+function renderSeries(eps, charName, platform, niche) {
+  document.getElementById('outTitle').textContent = `${charName} · ${eps.length}-Episode Series`;
+
+  const badgeRow = document.getElementById('seriesBadgeRow');
+  badgeRow.innerHTML = [
+    `<span class="series-info-badge">${platform}</span>`,
+    `<span class="series-info-badge">${eps.length} episodes</span>`,
+    `<span class="series-info-badge">${niche}</span>`,
+    document.getElementById('contToggle').classList.contains('on') ? `<span class="series-info-badge" style="color:var(--teal);border-color:rgba(6,214,160,0.2)">Auto-continued ✓</span>` : '',
+  ].join('');
+
+  const list = document.getElementById('episodesList');
+  list.innerHTML = '';
+
+  eps.forEach((ep, i) => {
+    const card = document.createElement('div');
+    card.className = 'ep-out-card';
+    card.style.animationDelay = (i*70)+'ms';
+    const isCont = i > 0 && document.getElementById('contToggle').classList.contains('on');
+    card.innerHTML = `
+      <div class="ep-out-header" onclick="toggleEp(${i})">
+        <div class="ep-out-left">
+          <span class="ep-num-badge">EP ${String(ep.episode||i+1).padStart(2,'0')}</span>
+          <span class="ep-out-title">${esc(ep.title)}</span>
+        </div>
+        <div class="ep-out-right">
+          ${isCont ? '<span class="ep-continuation-tag">↻ Continued</span>' : ''}
+          <button class="copy-btn" id="cpbtn${i}" onclick="event.stopPropagation();copyEp(${i},this)" title="Copy episode">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 8V2h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="ep-out-body" id="epbody${i}">
+        <div class="ep-hook-label">Hook</div>
+        <div class="ep-hook">${esc(ep.hook)}</div>
+        <div class="ep-script-label">Script</div>
+        <div class="ep-script">${esc(ep.script)}</div>
+        <div class="ep-cta-row">
+          <span class="ep-cta-label">CTA</span>
+          <span class="ep-cta-text">${esc(ep.cta)}</span>
+        </div>
+        ${ep.continuation_note ? `<div style="margin-top:10px;padding:8px 12px;background:rgba(6,214,160,0.05);border:1px solid rgba(6,214,160,0.1);border-radius:6px;font-size:12px;color:var(--teal)">→ Next episode continues: ${esc(ep.continuation_note)}</div>` : ''}
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  // open first one
+  document.getElementById('epbody0').classList.add('open');
+
+  const out = document.getElementById('episodesOut');
+  out.style.display = 'block';
+  setTimeout(() => out.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+}
+
+function toggleEp(i) {
+  document.getElementById('epbody'+i).classList.toggle('open');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyEp(i, btn) {
+  const ep = seriesData[i];
+  const text = `EP ${ep.episode||i+1}: ${ep.title}\n\nHOOK: ${ep.hook}\n\n${ep.script}\n\nCTA: ${ep.cta}`;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('done');
+    setTimeout(() => btn.classList.remove('done'), 1500);
+  });
+}
+
+function copyAllEpisodes() {
+  const text = seriesData.map((ep,i) =>
+    `EP ${ep.episode||i+1}: ${ep.title}\n\nHOOK: ${ep.hook}\n\n${ep.script}\n\nCTA: ${ep.cta}`
+  ).join('\n\n' + '─'.repeat(50) + '\n\n');
+  navigator.clipboard.writeText(text);
+}
+
+function downloadSeries() {
+  if (!seriesData.length) return;
+  const text = `${seriesCharName} — Episode Series\nGenerated by Series Lab\n${'═'.repeat(50)}\n\n` +
+    seriesData.map((ep,i) =>
+      `EP ${ep.episode||i+1}: ${ep.title}\n\nHOOK:\n${ep.hook}\n\nSCRIPT:\n${ep.script}\n\nCTA:\n${ep.cta}${ep.continuation_note ? '\n\nCONTINUATION NOTE:\n'+ep.continuation_note : ''}`
+    ).join('\n\n' + '─'.repeat(50) + '\n\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text],{type:'text/plain'}));
+  a.download = `${seriesCharName.replace(/\s+/g,'-').toLowerCase()}-episodes.txt`;
+  a.click();
+}
+
+function clearOut() {
+  document.getElementById('episodesOut').style.display = 'none';
+  seriesData = [];
+}
+</script>
+</body>
+</html>
 
