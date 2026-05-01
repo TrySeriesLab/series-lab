@@ -889,7 +889,7 @@ footer{
         <li class="dim">Series arc planning</li>
         <li class="dim">Team access</li>
       </ul>
-      <button class="btn-plan">Start Starter plan</button>
+      <button class="btn-plan" onclick="window.open('https://buy.stripe.com/14A9AS30L9BT7iM1sW4sE01','_blank')">Start Starter plan</button>
     </div>
 
     <!-- CREATOR — MOST POPULAR -->
@@ -908,7 +908,7 @@ footer{
         <li>Series arc planning</li>
         <li class="dim">Team access</li>
       </ul>
-      <button class="btn-plan">Start Creator plan</button>
+      <button class="btn-plan" onclick="window.open('https://buy.stripe.com/dRm14mbxh5lD32w1sW4sE02','_blank')">Start Creator plan</button>
     </div>
 
     <!-- PRO -->
@@ -927,7 +927,7 @@ footer{
         <li>Series arc planning</li>
         <li>Priority support</li>
       </ul>
-      <button class="btn-plan">Start Pro plan</button>
+      <button class="btn-plan" onclick="window.open('https://buy.stripe.com/bJefZgatd7tL6eI0oS4sE03','_blank')">Start Pro plan</button>
     </div>
 
     <!-- AGENCY -->
@@ -946,7 +946,7 @@ footer{
         <li>Series arc planning</li>
         <li>Team access (5 seats)</li>
       </ul>
-      <button class="btn-plan">Start Agency plan</button>
+      <button class="btn-plan" onclick="window.open('https://buy.stripe.com/bJe7sK30L8xP9qUb3w4sE04','_blank')">Start Agency plan</button>
     </div>
 
     <!-- STUDIO -->
@@ -965,7 +965,7 @@ footer{
         <li>Series arc planning</li>
         <li>Team access (10 seats)</li>
       </ul>
-      <button class="btn-plan">Start Studio plan</button>
+      <button class="btn-plan" onclick="window.open('https://buy.stripe.com/28E28q58TbK146AfjM4sE05','_blank')">Start Studio plan</button>
     </div>
 
   </div>
@@ -1065,7 +1065,7 @@ No markdown, no explanation. Just raw JSON array.`;
   const user = `Generate ${count} episodes (${length} each) for the "${charName}" series about "${niche}". Return JSON array only.`;
 
   try {
-    const res = await fetch('/api/generate', {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -1222,4 +1222,3 @@ function clearOut() {
 </script>
 </body>
 </html>
-
