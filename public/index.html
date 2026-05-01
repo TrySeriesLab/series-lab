@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Series Lab — Build a Character Series That Never Stops</title>
+<script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_ZnJhbmstY2FtZWwtNzQuY2xlcmsuYWNjb3VudHMuZGV2JA" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -547,8 +548,8 @@ footer{
     <a href="#pricing">Pricing</a>
   </div>
   <div class="nav-btns">
-    <button class="btn-ghost">Log in</button>
-    <button class="btn-cta-sm" onclick="document.getElementById('generator').scrollIntoView({behavior:'smooth'})">Start free →</button>
+    <button class="btn-ghost" id="sign-in-btn" onclick="openSignIn()">Log in</button>
+    <button class="btn-cta-sm" id="sign-up-btn" onclick="openSignUp()">Get started →</button>
   </div>
 </nav>
 
@@ -978,7 +979,7 @@ footer{
     <a href="#">Terms</a>
     <a href="#">Contact</a>
   </div>
-  <div class="footer-copy">© 2026 Series Lab · Built independently · Not affiliated with any other service · All content generated is original and owned by the user.</div>
+  <div class="footer-copy">© 2025 Series Lab · Built independently · Not affiliated with any other service · All content generated is original and owned by the user.</div>
 </footer>
 
 <script>
@@ -1222,3 +1223,211 @@ function clearOut() {
 </script>
 </body>
 </html>
+
+<!-- AUTH MODAL OVERLAY -->
+<div id="auth-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:#121220;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:40px;width:100%;max-width:420px;position:relative;margin:1rem">
+    <button onclick="closeAuth()" style="position:absolute;top:16px;right:16px;background:transparent;border:none;color:#8888a8;font-size:20px;cursor:pointer">✕</button>
+    <div id="clerk-modal"></div>
+  </div>
+</div>
+
+<!-- USER DASHBOARD SIDEBAR -->
+<div id="user-dashboard" style="display:none;position:fixed;top:0;right:0;bottom:0;width:320px;background:#0d0d1a;border-left:1px solid rgba(255,255,255,0.08);z-index:500;padding:24px;overflow-y:auto">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+    <span style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:#eeeef5">My Account</span>
+    <button onclick="closeDashboard()" style="background:transparent;border:none;color:#8888a8;font-size:20px;cursor:pointer">✕</button>
+  </div>
+
+  <!-- User info -->
+  <div style="background:#121220;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;margin-bottom:16px">
+    <div id="user-avatar" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ff6b35,#ffd166);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px">👤</div>
+    <div id="user-name" style="font-size:15px;font-weight:600;color:#eeeef5;margin-bottom:4px">Loading...</div>
+    <div id="user-email" style="font-size:12px;color:#8888a8"></div>
+  </div>
+
+  <!-- Current plan -->
+  <div style="background:#121220;border:1px solid rgba(255,107,53,0.2);border-radius:12px;padding:16px;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#ff6b35;margin-bottom:8px">Current Plan</div>
+    <div id="user-plan" style="font-size:18px;font-weight:700;color:#eeeef5;margin-bottom:4px">Free Trial</div>
+    <div style="font-size:12px;color:#8888a8;margin-bottom:12px">Upgrade to unlock more episodes</div>
+    <button onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});closeDashboard()" style="width:100%;padding:10px;border-radius:8px;background:#ff6b35;border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Upgrade plan →</button>
+  </div>
+
+  <!-- Usage -->
+  <div style="background:#121220;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8888a8;margin-bottom:12px">This Month</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:13px;color:#8888a8">Episodes generated</span>
+      <span id="episodes-used" style="font-size:13px;font-weight:600;color:#eeeef5">0</span>
+    </div>
+    <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden">
+      <div id="usage-bar" style="height:100%;background:linear-gradient(90deg,#ff6b35,#ffd166);border-radius:2px;width:0%;transition:width .3s"></div>
+    </div>
+  </div>
+
+  <!-- Sign out -->
+  <button onclick="signOut()" style="width:100%;padding:12px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:#8888a8;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">Sign out</button>
+</div>
+
+<script>
+// ============================================
+// CLERK AUTH SYSTEM
+// ============================================
+let clerk = null;
+let currentUser = null;
+let episodesUsed = 0;
+
+async function initClerk() {
+  try {
+    // Load Clerk with your publishable key from environment
+    const publishableKey = document.querySelector('[data-clerk-publishable-key]')?.getAttribute('data-clerk-publishable-key') 
+      || window.CLERK_PUBLISHABLE_KEY
+      || '';
+
+    if (!publishableKey) {
+      console.log('Clerk key not found - auth disabled in dev mode');
+      return;
+    }
+
+    await window.Clerk.load({ publishableKey });
+    clerk = window.Clerk;
+
+    // Check if user is already signed in
+    if (clerk.user) {
+      onUserSignedIn(clerk.user);
+    }
+
+    // Listen for auth changes
+    clerk.addListener(({ user }) => {
+      if (user) {
+        onUserSignedIn(user);
+      } else {
+        onUserSignedOut();
+      }
+    });
+
+  } catch(e) {
+    console.log('Clerk init error:', e);
+  }
+}
+
+function onUserSignedIn(user) {
+  currentUser = user;
+  
+  // Update nav buttons
+  document.getElementById('sign-in-btn').textContent = user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0] || 'Account';
+  document.getElementById('sign-in-btn').onclick = openDashboard;
+  document.getElementById('sign-up-btn').textContent = 'Dashboard →';
+  document.getElementById('sign-up-btn').onclick = openDashboard;
+
+  // Update dashboard
+  document.getElementById('user-name').textContent = 
+    (user.firstName ? user.firstName + ' ' + (user.lastName || '') : user.emailAddresses[0]?.emailAddress).trim();
+  document.getElementById('user-email').textContent = user.emailAddresses[0]?.emailAddress || '';
+  
+  // Set avatar
+  if (user.imageUrl) {
+    document.getElementById('user-avatar').innerHTML = `<img src="${user.imageUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`;
+  }
+
+  // Load usage from localStorage
+  const savedUsage = localStorage.getItem('sl_episodes_' + user.id) || '0';
+  episodesUsed = parseInt(savedUsage);
+  updateUsageDisplay();
+
+  closeAuth();
+}
+
+function onUserSignedOut() {
+  currentUser = null;
+  document.getElementById('sign-in-btn').textContent = 'Log in';
+  document.getElementById('sign-in-btn').onclick = openSignIn;
+  document.getElementById('sign-up-btn').textContent = 'Get started →';
+  document.getElementById('sign-up-btn').onclick = openSignUp;
+}
+
+function updateUsageDisplay() {
+  document.getElementById('episodes-used').textContent = episodesUsed;
+  const pct = Math.min((episodesUsed / 12) * 100, 100);
+  document.getElementById('usage-bar').style.width = pct + '%';
+}
+
+function trackEpisodeGeneration(count) {
+  if (currentUser) {
+    episodesUsed += count;
+    localStorage.setItem('sl_episodes_' + currentUser.id, episodesUsed);
+    updateUsageDisplay();
+  }
+}
+
+// Open/close functions
+function openSignIn() {
+  if (!clerk) { alert('Auth system loading, please wait a moment and try again.'); return; }
+  showAuthOverlay();
+  clerk.openSignIn({ afterSignInUrl: window.location.href });
+}
+
+function openSignUp() {
+  if (!clerk) { 
+    document.getElementById('generator').scrollIntoView({behavior:'smooth'});
+    return; 
+  }
+  showAuthOverlay();
+  clerk.openSignUp({ afterSignUpUrl: window.location.href });
+}
+
+function showAuthOverlay() {
+  const overlay = document.getElementById('auth-overlay');
+  overlay.style.display = 'flex';
+}
+
+function closeAuth() {
+  document.getElementById('auth-overlay').style.display = 'none';
+}
+
+function openDashboard() {
+  document.getElementById('user-dashboard').style.display = 'block';
+}
+
+function closeDashboard() {
+  document.getElementById('user-dashboard').style.display = 'none';
+}
+
+async function signOut() {
+  if (clerk) await clerk.signOut();
+  closeDashboard();
+}
+
+// Close overlay on background click
+document.getElementById('auth-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeAuth();
+});
+
+// Track episode generation
+const origGenerateSeries = window.generateSeries;
+window.generateSeriesWithAuth = async function() {
+  if (!currentUser) {
+    openSignUp();
+    return;
+  }
+  await generateSeries();
+  // Track usage after generation
+  const count = parseInt(document.getElementById('epCount').value) || 5;
+  trackEpisodeGeneration(count);
+}
+
+// Update generate button to require auth
+document.getElementById('genBtn').onclick = function() {
+  if (!currentUser) {
+    openSignUp();
+    return;
+  }
+  generateSeries();
+  const count = parseInt(document.getElementById('epCount').value) || 5;
+  setTimeout(() => trackEpisodeGeneration(count), 2000);
+};
+
+// Init Clerk when page loads
+window.addEventListener('load', initClerk);
+</script>
