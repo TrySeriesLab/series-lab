@@ -4,7 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Series Lab — Build a Character Series That Never Stops</title>
-<script>var clerkPK="pk_test_ZnJhbmstY2FtZWwtNzQuY2xlcmsuYWNjb3VudHMuZGV2JA";</script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -548,8 +547,8 @@ footer{
     <a href="#pricing">Pricing</a>
   </div>
   <div class="nav-btns">
-    <button class="btn-ghost" id="sign-in-btn" onclick="openSignIn()">Log in</button>
-    <button class="btn-cta-sm" id="sign-up-btn" onclick="openSignUp()">Get started →</button>
+    <button class="btn-ghost">Log in</button>
+    <button class="btn-cta-sm" onclick="document.getElementById('generator').scrollIntoView({behavior:'smooth'})">Start free →</button>
   </div>
 </nav>
 
@@ -570,7 +569,7 @@ footer{
     </p>
 
     <div class="hero-actions">
-      <button class="btn-hero" onclick="openSignUp()">
+      <button class="btn-hero" onclick="document.getElementById('generator').scrollIntoView({behavior:'smooth'})">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M6.5 5.5L11 8L6.5 10.5V5.5Z" fill="white"/></svg>
         Start your series today
       </button>
@@ -870,7 +869,7 @@ footer{
 <!-- PRICING -->
 <section class="pad" id="pricing">
   <div class="section-eyebrow">Simple pricing</div>
-  <h2 class="sec-title">Simple pricing.<br><em>Cancel anytime.</em></h2>
+  <h2 class="sec-title">Start free.<br><em>Scale when ready.</em></h2>
 
   <div class="pricing-grid">
 
@@ -1106,12 +1105,12 @@ function setLoading(on, count) {
         document.getElementById('pf'+filled).style.width = '100%';
         filled++;
         document.getElementById('progressLabel').textContent = `Writing episode ${filled} of ${count||5}…`;
-    
+      } else {
         clearInterval(interval);
       }
     }, 600);
     window._progInterval = interval;
-
+  } else {
     clearInterval(window._progInterval);
     pw.style.display = 'none';
     document.getElementById('genBtnText').textContent = 'Generate episode series →';
@@ -1224,51 +1223,192 @@ function clearOut() {
 </body>
 </html>
 
-<!-- AUTH MODAL OVERLAY -->
+<!-- ===== SIMPLE LOGIN MODAL ===== -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(8px)">
+  <div style="background:#121220;border:1px solid rgba(255,107,53,0.3);border-radius:16px;padding:36px;width:100%;max-width:400px;margin:1rem;position:relative">
+    <button onclick="closeModal()" style="position:absolute;top:14px;right:16px;background:transparent;border:none;color:#8888a8;font-size:22px;cursor:pointer;line-height:1">✕</button>
 
-<!-- USER DASHBOARD SIDEBAR -->
-<div id="user-dashboard" style="display:none;position:fixed;top:0;right:0;bottom:0;width:300px;background:#0d0d1a;border-left:1px solid rgba(255,255,255,0.08);z-index:9999;padding:24px;overflow-y:auto">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:#eeeef5;display:flex;align-items:center;justify-content:center;gap:8px">
+        <span style="width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#ff6b35,#ffd166);display:inline-flex;align-items:center;justify-content:center;font-size:14px">▶</span>
+        Series Lab
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;background:#0d0d1a;border-radius:8px;padding:3px;margin-bottom:24px">
+      <button id="tab-login" onclick="switchTab('login')" style="flex:1;padding:8px;border:none;border-radius:6px;background:#ff6b35;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Instrument Sans',sans-serif">Log in</button>
+      <button id="tab-signup" onclick="switchTab('signup')" style="flex:1;padding:8px;border:none;border-radius:6px;background:transparent;color:#8888a8;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Instrument Sans',sans-serif">Sign up</button>
+    </div>
+
+    <!-- Google Button -->
+    <button onclick="googleAuth()" style="width:100%;padding:11px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:#1a1a2e;color:#eeeef5;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;font-family:'Instrument Sans',sans-serif;transition:all .15s" onmouseover="this.style.background='#222235'" onmouseout="this.style.background='#1a1a2e'">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
+      Continue with Google
+    </button>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.06)"></div>
+      <span style="font-size:12px;color:#44445a">or</span>
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.06)"></div>
+    </div>
+
+    <!-- Email/Password Form -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <input id="auth-email" type="email" placeholder="Email address" style="background:#0d0d1a;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:11px 14px;font-family:'Instrument Sans',sans-serif;font-size:14px;color:#eeeef5;outline:none;width:100%" onfocus="this.style.borderColor='rgba(255,107,53,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"/>
+      <input id="auth-password" type="password" placeholder="Password" style="background:#0d0d1a;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:11px 14px;font-family:'Instrument Sans',sans-serif;font-size:14px;color:#eeeef5;outline:none;width:100%" onfocus="this.style.borderColor='rgba(255,107,53,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"/>
+      <input id="auth-name" type="text" placeholder="Your name" style="background:#0d0d1a;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:11px 14px;font-family:'Instrument Sans',sans-serif;font-size:14px;color:#eeeef5;outline:none;width:100%;display:none" onfocus="this.style.borderColor='rgba(255,107,53,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"/>
+      <div id="auth-error" style="display:none;font-size:12px;color:#ff7070;text-align:center"></div>
+      <button id="auth-submit" onclick="handleAuth()" style="width:100%;padding:12px;border-radius:8px;border:none;background:linear-gradient(90deg,#ff6b35,#ff8c55);color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif;transition:all .15s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">Log in</button>
+    </div>
+
+    <p style="text-align:center;font-size:12px;color:#44445a;margin-top:16px">By continuing you agree to our <a href="#" style="color:#8888a8">Terms</a> and <a href="#" style="color:#8888a8">Privacy Policy</a></p>
+  </div>
+</div>
+
+<!-- USER DASHBOARD -->
+<div id="user-dashboard" style="display:none;position:fixed;top:0;right:0;bottom:0;width:300px;background:#0d0d1a;border-left:1px solid rgba(255,255,255,0.08);z-index:9999;padding:24px;overflow-y:auto;box-shadow:-4px 0 24px rgba(0,0,0,0.4)">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
     <span style="font-family:'Fraunces',serif;font-size:18px;font-weight:700;color:#eeeef5">My Account</span>
     <button onclick="closeDashboard()" style="background:transparent;border:none;color:#8888a8;font-size:20px;cursor:pointer">✕</button>
   </div>
   <div style="background:#121220;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;margin-bottom:16px">
-    <div id="user-avatar" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ff6b35,#ffd166);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px">👤</div>
-    <div id="user-name" style="font-size:15px;font-weight:600;color:#eeeef5;margin-bottom:4px">Loading...</div>
-    <div id="user-email" style="font-size:12px;color:#8888a8"></div>
+    <div id="dash-avatar" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ff6b35,#ffd166);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:10px">👤</div>
+    <div id="dash-name" style="font-size:15px;font-weight:600;color:#eeeef5;margin-bottom:2px"></div>
+    <div id="dash-email" style="font-size:12px;color:#8888a8"></div>
   </div>
   <div style="background:#121220;border:1px solid rgba(255,107,53,0.2);border-radius:12px;padding:16px;margin-bottom:16px">
-    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#ff6b35;margin-bottom:8px">Current Plan</div>
-    <div id="user-plan" style="font-size:18px;font-weight:700;color:#eeeef5;margin-bottom:4px">Trial</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">Current Plan</div>
+    <div style="font-size:18px;font-weight:700;color:#eeeef5;margin-bottom:4px">Trial</div>
     <div style="font-size:12px;color:#8888a8;margin-bottom:12px">Upgrade to unlock more episodes</div>
-    <button onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});closeDashboard()" style="width:100%;padding:10px;border-radius:8px;background:#ff6b35;border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Upgrade plan →</button>
+    <button onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});closeDashboard()" style="width:100%;padding:10px;border-radius:8px;background:#ff6b35;border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif">Upgrade plan →</button>
   </div>
   <div style="background:#121220;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;margin-bottom:16px">
-    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8888a8;margin-bottom:12px">This Month</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#8888a8;margin-bottom:10px">This Month</div>
     <div style="display:flex;justify-content:space-between;margin-bottom:8px">
       <span style="font-size:13px;color:#8888a8">Episodes generated</span>
-      <span id="episodes-used" style="font-size:13px;font-weight:600;color:#eeeef5">0</span>
+      <span id="dash-episodes" style="font-size:13px;font-weight:600;color:#eeeef5">0</span>
     </div>
     <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden">
-      <div id="usage-bar" style="height:100%;background:linear-gradient(90deg,#ff6b35,#ffd166);border-radius:2px;width:0%;transition:width .3s"></div>
+      <div id="dash-usage-bar" style="height:100%;background:linear-gradient(90deg,#ff6b35,#ffd166);width:0%;transition:width .3s;border-radius:2px"></div>
     </div>
   </div>
-  <button onclick="signOut()" style="width:100%;padding:12px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:#8888a8;font-size:13px;cursor:pointer">Sign out</button>
+  <button onclick="signOut()" style="width:100%;padding:12px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:#8888a8;font-size:13px;cursor:pointer;font-family:'Instrument Sans',sans-serif">Sign out</button>
 </div>
 
 <script>
-var clerk = null;
+// ===== SIMPLE AUTH SYSTEM =====
 var currentUser = null;
+var currentTab = 'login';
 var episodesUsed = 0;
 
-function openSignIn() {
-  if (!clerk) { alert('Please wait a moment and try again.'); return; }
-  clerk.openSignIn({ afterSignInUrl: window.location.href });
+function openModal(tab) {
+  switchTab(tab || 'login');
+  var overlay = document.getElementById('modal-overlay');
+  overlay.style.display = 'flex';
+  setTimeout(function() { document.getElementById('auth-email').focus(); }, 100);
 }
 
-function openSignUp() {
-  if (!clerk) { alert('Please wait a moment and try again.'); return; }
-  clerk.openSignUp({ afterSignUpUrl: window.location.href });
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  var nameField = document.getElementById('auth-name');
+  var submitBtn = document.getElementById('auth-submit');
+  var tabLogin = document.getElementById('tab-login');
+  var tabSignup = document.getElementById('tab-signup');
+
+  if (tab === 'signup') {
+    nameField.style.display = 'block';
+    submitBtn.textContent = 'Create account';
+    tabLogin.style.background = 'transparent';
+    tabLogin.style.color = '#8888a8';
+    tabSignup.style.background = '#ff6b35';
+    tabSignup.style.color = '#fff';
+  } else {
+    nameField.style.display = 'none';
+    submitBtn.textContent = 'Log in';
+    tabLogin.style.background = '#ff6b35';
+    tabLogin.style.color = '#fff';
+    tabSignup.style.background = 'transparent';
+    tabSignup.style.color = '#8888a8';
+  }
+}
+
+function showError(msg) {
+  var el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function handleAuth() {
+  var email = document.getElementById('auth-email').value.trim();
+  var password = document.getElementById('auth-password').value;
+  var name = document.getElementById('auth-name').value.trim();
+
+  if (!email) { showError('Please enter your email'); return; }
+  if (!password || password.length < 6) { showError('Password must be at least 6 characters'); return; }
+  if (currentTab === 'signup' && !name) { showError('Please enter your name'); return; }
+
+  // Save/check user in localStorage
+  var users = JSON.parse(localStorage.getItem('sl_users') || '{}');
+
+  if (currentTab === 'signup') {
+    if (users[email]) { showError('Account already exists — please log in'); return; }
+    users[email] = { name: name, password: btoa(password), episodes: 0 };
+    localStorage.setItem('sl_users', JSON.stringify(users));
+    loginUser(email, name, users[email]);
+  } else {
+    if (!users[email]) { showError('No account found — please sign up'); return; }
+    if (users[email].password !== btoa(password)) { showError('Incorrect password'); return; }
+    loginUser(email, users[email].name, users[email]);
+  }
+}
+
+function googleAuth() {
+  // Simulate Google auth for now
+  var email = prompt('Enter your Google email:');
+  if (!email) return;
+  var name = email.split('@')[0];
+  var users = JSON.parse(localStorage.getItem('sl_users') || '{}');
+  if (!users[email]) {
+    users[email] = { name: name, password: '', episodes: 0 };
+    localStorage.setItem('sl_users', JSON.stringify(users));
+  }
+  loginUser(email, users[email].name || name, users[email]);
+}
+
+function loginUser(email, name, userData) {
+  currentUser = { email: email, name: name };
+  episodesUsed = userData.episodes || 0;
+  localStorage.setItem('sl_current_user', JSON.stringify(currentUser));
+
+  // Update nav
+  document.getElementById('sign-in-btn').textContent = name.split(' ')[0];
+  document.getElementById('sign-in-btn').onclick = openDashboard;
+  document.getElementById('sign-up-btn').textContent = 'Dashboard →';
+  document.getElementById('sign-up-btn').onclick = openDashboard;
+
+  // Update dashboard
+  document.getElementById('dash-name').textContent = name;
+  document.getElementById('dash-email').textContent = email;
+  document.getElementById('dash-avatar').textContent = name.charAt(0).toUpperCase();
+  updateUsage();
+  closeModal();
+}
+
+function signOut() {
+  currentUser = null;
+  localStorage.removeItem('sl_current_user');
+  document.getElementById('sign-in-btn').textContent = 'Log in';
+  document.getElementById('sign-in-btn').onclick = function() { openModal('login'); };
+  document.getElementById('sign-up-btn').textContent = 'Get started →';
+  document.getElementById('sign-up-btn').onclick = function() { openModal('signup'); };
+  closeDashboard();
 }
 
 function openDashboard() {
@@ -1279,116 +1419,65 @@ function closeDashboard() {
   document.getElementById('user-dashboard').style.display = 'none';
 }
 
-function signOut() {
-  if (clerk) clerk.signOut();
-  closeDashboard();
-  onUserSignedOut();
-}
-
-function onUserSignedIn(user) {
-  currentUser = user;
-  var name = user.firstName ? user.firstName + ' ' + (user.lastName || '') : user.emailAddresses[0].emailAddress.split('@')[0];
-  document.getElementById('sign-in-btn').textContent = name.trim();
-  document.getElementById('sign-in-btn').onclick = openDashboard;
-  document.getElementById('sign-up-btn').textContent = 'Dashboard →';
-  document.getElementById('sign-up-btn').onclick = openDashboard;
-  document.getElementById('user-name').textContent = name.trim();
-  document.getElementById('user-email').textContent = user.emailAddresses[0].emailAddress;
-  if (user.imageUrl) {
-    document.getElementById('user-avatar').innerHTML = '<img src="' + user.imageUrl + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
-  }
-  var saved = localStorage.getItem('sl_ep_' + user.id) || '0';
-  episodesUsed = parseInt(saved);
-  updateUsage();
-}
-
-function onUserSignedOut() {
-  currentUser = null;
-  document.getElementById('sign-in-btn').textContent = 'Log in';
-  document.getElementById('sign-in-btn').onclick = openSignIn;
-  document.getElementById('sign-up-btn').textContent = 'Get started →';
-  document.getElementById('sign-up-btn').onclick = openSignUp;
-}
-
 function updateUsage() {
-  document.getElementById('episodes-used').textContent = episodesUsed;
+  document.getElementById('dash-episodes').textContent = episodesUsed;
   var pct = Math.min((episodesUsed / 12) * 100, 100);
-  document.getElementById('usage-bar').style.width = pct + '%';
+  document.getElementById('dash-usage-bar').style.width = pct + '%';
 }
 
 function trackUsage(count) {
-  if (currentUser) {
-    episodesUsed += count;
-    localStorage.setItem('sl_ep_' + currentUser.id, episodesUsed);
-    updateUsage();
+  if (!currentUser) return;
+  episodesUsed += count;
+  var users = JSON.parse(localStorage.getItem('sl_users') || '{}');
+  if (users[currentUser.email]) {
+    users[currentUser.email].episodes = episodesUsed;
+    localStorage.setItem('sl_users', JSON.stringify(users));
   }
+  updateUsage();
 }
 
-async function initClerk() {
-  try {
-    
-    if (!key) { console.log('No Clerk key found'); return; }
-    var pk = window.clerkPK;
-    if (!pk) { console.log('Clerk key empty'); return; }
-    await window.Clerk.load({ publishableKey: pk });
-    clerk = window.Clerk;
-    if (clerk.user) onUserSignedIn(clerk.user);
-    clerk.addListener(function(state) {
-      if (state.user) { onUserSignedIn(state.user); }
-      else { onUserSignedOut(); }
-    });
-  } catch(e) {
-    console.log('Clerk error:', e);
-  }
-}
+// Close modal on overlay click
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
 
-// Override generate button to require login
-document.addEventListener('DOMContentLoaded', function() {
-  var btn = document.getElementById('genBtn');
-  if (btn) {
-    btn.onclick = function() {
-      if (!currentUser) { openSignUp(); return; }
-      generateSeries();
-      var count = parseInt(document.getElementById('epCount').value) || 5;
-      setTimeout(function() { trackUsage(count); }, 3000);
-    };
+// Allow Enter key to submit
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('modal-overlay').style.display === 'flex') {
+    handleAuth();
   }
 });
 
+// Wire up nav buttons
+document.getElementById('sign-in-btn').onclick = function() { openModal('login'); };
+document.getElementById('sign-up-btn').onclick = function() { openModal('signup'); };
 
-window.addEventListener("load", function() {
-  // Wait a moment for Clerk to initialize then run
-  setTimeout(function() {
-    if (window.Clerk) {
-      initClerk();
-    } else {
-      // Try again after another second
-      setTimeout(function() {
-        if (window.Clerk) initClerk();
-      }, 1000);
-    }
-  }, 500);
-});
-</script>
-<script>
-// Load Clerk directly at bottom of page so everything is ready
-(function() {
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
-  s.onload = function() {
-    window.Clerk.load({ publishableKey: clerkPK }).then(function() {
-      clerk = window.Clerk;
-      console.log('Clerk loaded successfully!');
-      if (clerk.user) onUserSignedIn(clerk.user);
-      clerk.addListener(function(state) {
-        if (state.user) onUserSignedIn(state.user);
-        else onUserSignedOut();
-      });
-    }).catch(function(e) { console.log('Clerk load error:', e); });
+// Wire up hero button
+var heroBtn = document.querySelector('.btn-hero');
+if (heroBtn) heroBtn.onclick = function() { openModal('signup'); };
+
+// Wire up generate button to require login
+var genBtn = document.getElementById('genBtn');
+if (genBtn) {
+  genBtn.onclick = function() {
+    if (!currentUser) { openModal('signup'); return; }
+    generateSeries();
+    var count = parseInt(document.getElementById('epCount').value) || 5;
+    setTimeout(function() { trackUsage(count); }, 3000);
   };
-  s.onerror = function() { console.log('Clerk script failed to load'); };
-  document.body.appendChild(s);
-})();
+}
+
+// Auto-login if user was previously logged in
+window.addEventListener('load', function() {
+  var saved = localStorage.getItem('sl_current_user');
+  if (saved) {
+    try {
+      var user = JSON.parse(saved);
+      var users = JSON.parse(localStorage.getItem('sl_users') || '{}');
+      if (users[user.email]) loginUser(user.email, user.name, users[user.email]);
+    } catch(e) {}
+  }
+});
 </script>
 </body>
 </html>
