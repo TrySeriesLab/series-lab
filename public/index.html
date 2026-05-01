@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Series Lab — Build a Character Series That Never Stops</title>
-<script>var clerkPK = "pk_test_ZnJhbmstY2FtZWwtNzQuY2xlcmsuYWNjb3VudHMuZGV2JA";</script><script defer src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" crossorigin="anonymous"></script>
+<script>var clerkPK="pk_test_ZnJhbmstY2FtZWwtNzQuY2xlcmsuYWNjb3VudHMuZGV2JA";</script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1369,6 +1369,26 @@ window.addEventListener("load", function() {
     }
   }, 500);
 });
+</script>
+<script>
+// Load Clerk directly at bottom of page so everything is ready
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js';
+  s.onload = function() {
+    window.Clerk.load({ publishableKey: clerkPK }).then(function() {
+      clerk = window.Clerk;
+      console.log('Clerk loaded successfully!');
+      if (clerk.user) onUserSignedIn(clerk.user);
+      clerk.addListener(function(state) {
+        if (state.user) onUserSignedIn(state.user);
+        else onUserSignedOut();
+      });
+    }).catch(function(e) { console.log('Clerk load error:', e); });
+  };
+  s.onerror = function() { console.log('Clerk script failed to load'); };
+  document.body.appendChild(s);
+})();
 </script>
 </body>
 </html>
