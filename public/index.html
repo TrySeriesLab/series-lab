@@ -570,7 +570,7 @@ footer{
     </p>
 
     <div class="hero-actions">
-      <button class="btn-hero" onclick="document.getElementById('generator').scrollIntoView({behavior:'smooth'})">
+      <button class="btn-hero" onclick="openSignUp()">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="white" stroke-width="1.5"/><path d="M6.5 5.5L11 8L6.5 10.5V5.5Z" fill="white"/></svg>
         Start your series today
       </button>
@@ -870,7 +870,7 @@ footer{
 <!-- PRICING -->
 <section class="pad" id="pricing">
   <div class="section-eyebrow">Simple pricing</div>
-  <h2 class="sec-title">Start free.<br><em>Scale when ready.</em></h2>
+  <h2 class="sec-title">Simple pricing.<br><em>Cancel anytime.</em></h2>
 
   <div class="pricing-grid">
 
@@ -1290,7 +1290,7 @@ async function initClerk() {
       return;
     }
 
-    await window.Clerk.load({ publishableKey });
+    await window.Clerk.load();
     clerk = window.Clerk;
 
     // Check if user is already signed in
@@ -1362,18 +1362,18 @@ function trackEpisodeGeneration(count) {
 }
 
 // Open/close functions
-function openSignIn() {
+function openSignIn() { if (!clerk) { alert("Auth loading, try again in a second."); return; } clerk.openSignIn({ afterSignInUrl: window.location.href }); }
   if (!clerk) { alert('Auth system loading, please wait a moment and try again.'); return; }
-  showAuthOverlay();
+  
   clerk.openSignIn({ afterSignInUrl: window.location.href });
 }
 
-function openSignUp() {
+function openSignUp() { if (!clerk) { alert("Auth loading, try again in a second."); return; } clerk.openSignUp({ afterSignUpUrl: window.location.href }); }
   if (!clerk) { 
     document.getElementById('generator').scrollIntoView({behavior:'smooth'});
     return; 
   }
-  showAuthOverlay();
+  
   clerk.openSignUp({ afterSignUpUrl: window.location.href });
 }
 
