@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Series Lab — Build a Character Series That Never Stops</title>
-<script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_ZnJhbmstY2FtZWwtNzQuY2xlcmsuYWNjb3VudHMuZGV2JA" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+<script>var clerkPK = "pk_test_ZnJhbmstY2FtZWwtNzQuY2xlcmsuYWNjb3VudHMuZGV2JA";</script><script defer src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" crossorigin="anonymous"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1106,12 +1106,12 @@ function setLoading(on, count) {
         document.getElementById('pf'+filled).style.width = '100%';
         filled++;
         document.getElementById('progressLabel').textContent = `Writing episode ${filled} of ${count||5}…`;
-      } else {
+    
         clearInterval(interval);
       }
     }, 600);
     window._progInterval = interval;
-  } else {
+
     clearInterval(window._progInterval);
     pw.style.display = 'none';
     document.getElementById('genBtnText').textContent = 'Generate episode series →';
@@ -1326,9 +1326,9 @@ function trackUsage(count) {
 
 async function initClerk() {
   try {
-    var key = document.querySelector('[data-clerk-publishable-key]');
+    
     if (!key) { console.log('No Clerk key found'); return; }
-    var pk = key.getAttribute('data-clerk-publishable-key');
+    var pk = window.clerkPK;
     if (!pk) { console.log('Clerk key empty'); return; }
     await window.Clerk.load({ publishableKey: pk });
     clerk = window.Clerk;
@@ -1355,12 +1355,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-window.addEventListener('load', function() {
-  if (window.Clerk) {
-    initClerk();
-  } else {
-    document.querySelector('[src*="clerk.browser.js"]').addEventListener('load', initClerk);
-  }
+
+window.addEventListener("load", function() {
+  // Wait a moment for Clerk to initialize then run
+  setTimeout(function() {
+    if (window.Clerk) {
+      initClerk();
+    } else {
+      // Try again after another second
+      setTimeout(function() {
+        if (window.Clerk) initClerk();
+      }, 1000);
+    }
+  }, 500);
 });
 </script>
 </body>
