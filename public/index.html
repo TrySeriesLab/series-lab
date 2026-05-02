@@ -565,7 +565,7 @@ footer{
     <h1 class="hero-h1">Build a series<br><em>audiences</em><br><span class="line2">come back for</span></h1>
 
     <p class="hero-sub">
-      Create your AI character once. Then generate <strong>full episodes automatically</strong> — same voice, same personality, same story thread — forever.
+      Create your AI character once. Then generate <strong>full episode scripts automatically</strong> — same voice, same personality, same story thread — forever.
     </p>
 
     <div class="hero-actions">
@@ -869,7 +869,7 @@ footer{
 <!-- PRICING -->
 <section class="pad" id="pricing">
   <div class="section-eyebrow">Simple pricing</div>
-  <h2 class="sec-title">Start free.<br><em>Scale when ready.</em></h2>
+  <h2 class="sec-title">Simple pricing.<br><em>Cancel anytime.</em></h2>
 
   <div class="pricing-grid">
 
@@ -1280,7 +1280,7 @@ function clearOut() {
   </div>
   <div style="background:#121220;border:1px solid rgba(255,107,53,0.2);border-radius:12px;padding:16px;margin-bottom:16px">
     <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#ff6b35;margin-bottom:6px">Current Plan</div>
-    <div style="font-size:18px;font-weight:700;color:#eeeef5;margin-bottom:4px">Trial</div>
+    <div style="font-size:18px;font-weight:700;color:#eeeef5;margin-bottom:4px">Starter</div>
     <div style="font-size:12px;color:#8888a8;margin-bottom:12px">Upgrade to unlock more episodes</div>
     <button onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});closeDashboard()" style="width:100%;padding:10px;border-radius:8px;background:#ff6b35;border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'Instrument Sans',sans-serif">Upgrade plan →</button>
   </div>
@@ -1481,3 +1481,40 @@ window.addEventListener('load', function() {
 </script>
 </body>
 </html>
+<script>
+// ===== USAGE LIMITS =====
+var planLimits = { 'trial':3, 'Starter':12, 'Creator':25, 'Pro':50, 'Agency':120, 'Studio':250 };
+
+function getUserPlan() {
+  if (!currentUser) return 'trial';
+  var users = JSON.parse(localStorage.getItem('sl_users') || '{}');
+  return (users[currentUser.email] && users[currentUser.email].plan) || 'trial';
+}
+
+function getEpisodeLimit() {
+  return planLimits[getUserPlan()] || 3;
+}
+
+function showUpgradePrompt(used, limit) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)';
+  overlay.innerHTML = '<div style="background:#121220;border:1px solid rgba(255,107,53,0.4);border-radius:16px;padding:36px;max-width:400px;width:90%;text-align:center"><div style="font-size:36px;margin-bottom:16px">🔒</div><h3 style="font-family:\'Fraunces\',serif;font-size:22px;font-weight:800;color:#eeeef5;margin-bottom:10px">Episode limit reached</h3><p style="font-size:14px;color:#8888a8;margin-bottom:6px">You\'ve used <strong style="color:#ff6b35">'+used+' of '+limit+' episodes</strong> this month.</p><p style="font-size:14px;color:#8888a8;margin-bottom:24px">Upgrade your plan to keep generating episodes.</p><button onclick="document.getElementById(\'pricing\').scrollIntoView({behavior:\'smooth\'});this.closest(\'div\').parentElement.remove()" style="width:100%;padding:13px;border-radius:8px;background:linear-gradient(90deg,#ff6b35,#ff8c55);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Instrument Sans\',sans-serif;margin-bottom:10px">View plans →</button><button onclick="this.closest(\'div\').parentElement.remove()" style="width:100%;padding:10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:#8888a8;font-size:13px;cursor:pointer">Maybe later</button></div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e) { if(e.target===this) this.remove(); });
+}
+
+// Override generate button with limits
+document.getElementById('genBtn').onclick = function() {
+  if (!currentUser) { openModal('signup'); return; }
+  var limit = getEpisodeLimit();
+  var count = parseInt(document.getElementById('epCount').value) || 5;
+  if (episodesUsed >= limit) { showUpgradePrompt(episodesUsed, limit); return; }
+  if (episodesUsed + count > limit) {
+    var remaining = limit - episodesUsed;
+    alert('You only have ' + remaining + ' episodes left this month. Reduce the count or upgrade your plan.');
+    return;
+  }
+  generateSeries();
+  setTimeout(function() { trackUsage(count); }, 3000);
+};
+</script>
