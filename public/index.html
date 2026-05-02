@@ -1511,7 +1511,7 @@ document.getElementById('genBtn').onclick = function() {
   if (episodesUsed >= limit) { showUpgradePrompt(episodesUsed, limit); return; }
   if (episodesUsed + count > limit) {
     var remaining = limit - episodesUsed;
-    alert('You only have ' + remaining + ' episodes left this month. Reduce the count or upgrade your plan.');
+    alert('You only have ' + remaining + ' episodes on your current plan. Reduce the number of episodes or upgrade to generate more.');
     return;
   }
   generateSeries();
