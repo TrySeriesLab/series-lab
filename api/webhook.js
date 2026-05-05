@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
       return false;
     }
   }
-
+  
   try {
     const event = req.body;
     const eventType = event.type;
