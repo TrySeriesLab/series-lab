@@ -1,13 +1,11 @@
 import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
-
   // Map Stripe price IDs to plan names
   // You'll need to update these with your actual Stripe price IDs
   const planMap = {
@@ -88,7 +86,13 @@ export default async function handler(req, res) {
         }
 // Send welcome email
 await resend.emails.send({
+await resend.emails.send({
   from: 'Series Lab <hello@tryserieslab.com>',
+  to: [email],
+  subject: 'Welcome to Series Lab — you\'re in 🎬',
+  text: `Hey there,\n\nWelcome to Series Lab! Your ${plan} plan is now active.\n\nLog in at https://tryserieslab.com\n\n- Series Lab Team`,
+});
+console.log(`Welcome email sent to ${email}`);  from: 'Series Lab <hello@tryserieslab.com>',
   to: [email],
   subject: 'Welcome to Series Lab — you\'re in 🎬',
   text: `Hey there,
