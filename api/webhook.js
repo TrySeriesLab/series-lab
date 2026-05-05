@@ -1,8 +1,10 @@
+import { Resend } from 'resend';
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
@@ -84,7 +86,20 @@ export default async function handler(req, res) {
           else if (amount === 14900) plan = 'Agency';
           else if (amount === 29900) plan = 'Studio';
         }
+// Send welcome email
+await resend.emails.send({
+  from: 'Series Lab <hello@tryserieslab.com>',
+  to: [email],
+  subject: 'Welcome to Series Lab — you\'re in 🎬',
+  text: `Hey there,
 
+Welcome to Series Lab! Your ${plan} plan is now active.
+
+Log in at https://tryserieslab.com to get started.
+
+- Series Lab Team`,
+});
+console.log(`Welcome email sent to ${email}`);
         await updateUserPlan(email, plan);
         console.log(`Upgraded ${email} to ${plan}`);
       }
