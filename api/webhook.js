@@ -85,14 +85,21 @@ export default async function handler(req, res) {
           else if (amount === 29900) plan = 'Studio';
         }
 // Send welcome email
-await resend.emails.send({
-await resend.emails.send({
-  from: 'Series Lab <hello@tryserieslab.com>',
-  to: [email],
-  subject: 'Welcome to Series Lab — you\'re in 🎬',
-  text: `Hey there,\n\nWelcome to Series Lab! Your ${plan} plan is now active.\n\nLog in at https://tryserieslab.com\n\n- Series Lab Team`,
+await fetch('https://api.resend.com/emails', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${RESEND_API_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    from: 'Series Lab <hello@tryserieslab.com>',
+    to: [email],
+    subject: 'Welcome to Series Lab 🎬',
+    text: `Hey there,\n\nWelcome to Series Lab! Your ${plan} plan is now active.\n\nLog in at https://tryserieslab.com\n\n- Series Lab Team`,
+  }),
 });
-console.log(`Welcome email sent to ${email}`);  from: 'Series Lab <hello@tryserieslab.com>',
+console.log(`Welcome email sent to ${email}`);
+        from: 'Series Lab <hello@tryserieslab.com>',
   to: [email],
   subject: 'Welcome to Series Lab — you\'re in 🎬',
   text: `Hey there,
